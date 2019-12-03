@@ -5,8 +5,8 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/hashcloak/Meson-wallet-demo/pkg/ethers"
 	"github.com/hashcloak/Meson-client/pkg/client"
+	"github.com/hashcloak/Meson-wallet-demo/pkg/ethers"
 	"github.com/katzenpost/client/config"
 )
 
@@ -25,7 +25,7 @@ func main() {
 		panic(err)
 	}
 
-    if *rawTransactionBlob == "" {
+	if *rawTransactionBlob == "" {
 		if *privKey == "" {
 			panic("must specify a transaction blob in hex or a private key to sign a txn")
 		}
@@ -35,20 +35,19 @@ func main() {
 		}
 	}
 
-    c, err := client.New(cfg, *service)
-    if err != nil {
-        panic(err)
-    }
+	c, err := client.New(cfg, *service)
+	if err != nil {
+		panic(err)
+	}
 
-    c.Start()
-    reply, err := c.SendRawTransaction(rawTransactionBlob, chainID, ticker)
-    if err != nil {
-        panic(err)
-    }
+	c.Start()
+	reply, err := c.SendRawTransaction(rawTransactionBlob, chainID, ticker)
+	if err != nil {
+		panic(err)
+	}
 
-    fmt.Sprintf("Reply from the provider: %s", reply)
-    c.Stop()
-	
+	fmt.Sprintf("Reply from the provider: %s", reply)
+	c.Stop()
 
 }
 
