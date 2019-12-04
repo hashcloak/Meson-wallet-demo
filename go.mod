@@ -7,5 +7,3 @@ require (
 	github.com/hashcloak/Meson-client v0.0.0-20191203233537-dc6d4bdd3049
 	github.com/katzenpost/client v0.0.3-0.20191109165001-aa02bb21ca21
 )
-
-replace gihtub.com/hashcloak/Meson-client => ../Meson-client
