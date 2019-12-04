@@ -9,15 +9,13 @@ clean:
 
 build:
 	docker build -t hashcloak/meson-wallet -f Dockerfile .
-	@touch $(flags)/$@
 
 send-txn: build
-	docker run --mount type=bind,source=`pwd`/client.toml,target=/client.toml \
+	docker run \
 		--network nonvoting_testnet_nonvoting_test_net \
 		hashcloak/meson-wallet \
 		/wallet \
 		-pk $(shell cat ./pk) \
-		-c client.toml \
 		-t gor \
 		-s gor \
 		-chain 5

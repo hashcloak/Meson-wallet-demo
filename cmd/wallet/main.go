@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	cfgFile := flag.String("c", "katzenpost.toml", "Path to the server config file")
+	cfgFile := flag.String("c", "client.toml", "Path to the server config file")
 	ticker := flag.String("t", "", "Ticker")
 	chainID := flag.Int("chain", 1, "Chain ID for specific ETH-based chain")
 	service := flag.String("s", "", "Service Name")
@@ -31,22 +31,22 @@ func main() {
 		}
 		rawTransactionBlob, err = produceSignedRawTxn(privKey, rpcEndpoint, chainID)
 		if err != nil {
-			panic(err)
+			panic("Raw txn erro: " + err.Error())
 		}
 	}
 
 	c, err := client.New(cfg, *service)
 	if err != nil {
-		panic(err)
+		panic("Client error" + err.Error())
 	}
 
 	c.Start()
 	reply, err := c.SendRawTransaction(rawTransactionBlob, chainID, ticker)
 	if err != nil {
-		panic(err)
+		panic("Meson Request Error" + err.Error())
 	}
 
-	fmt.Sprintf("Reply from the provider: %s", reply)
+	fmt.Printf("Reply from the provider: %s\n", reply)
 	c.Stop()
 
 }

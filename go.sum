@@ -81,6 +81,10 @@ github.com/google/go-cmp v0.3.1/go.mod h1:8QqcDgzrUqlUb/G2PQTWiueGozuR1884gddMyw
 github.com/gorilla/websocket v1.4.1-0.20190629185528-ae1634f6a989 h1:giknQ4mEuDFmmHSrGcbargOuLHQGtywqo4mheITex54=
 github.com/gorilla/websocket v1.4.1-0.20190629185528-ae1634f6a989/go.mod h1:E7qHFY5m1UJ88s3WnNqhKjPHQ0heANvMoAMk2YaljkQ=
 github.com/graph-gophers/graphql-go v0.0.0-20191115155744-f33e81362277/go.mod h1:9CQHMSxwO4MprSdzoIEobiHpoLtHm77vfxsvsIN5Vuc=
+github.com/hashcloak/Meson-client v0.0.0-20191203044137-ad8b0c0b105e h1:MXx6PLQousT7MSh8BCWEjkPEwdRJmZRUtUFGjxIXW+E=
+github.com/hashcloak/Meson-client v0.0.0-20191203044137-ad8b0c0b105e/go.mod h1:+FDayyET8oa0c43OIQJNGTIOfaKWjRh3ZBAT3+KcDO8=
+github.com/hashcloak/Meson-client v0.0.0-20191203233537-dc6d4bdd3049 h1:/L/D1krbiZyB+/Y50jdeDMPoBS/o4QGsipifgiOsTcU=
+github.com/hashcloak/Meson-client v0.0.0-20191203233537-dc6d4bdd3049/go.mod h1:cVQhORnr5ygIYruaGKMGKM91wotzzx8gDa7S2Z68qk4=
 github.com/hashcloak/Meson/plugin v0.0.0-20191130194144-a50c00894e10 h1:xVCs10nftGQe7ZVsqK1MkTQLpkAFWib9I4A86EhB+WE=
 github.com/hashcloak/Meson/plugin v0.0.0-20191130194144-a50c00894e10/go.mod h1:YaWRodaYneUTEjUxxmSHFFbRFgip3Yqol9weTS/8d0M=
 github.com/hashicorp/golang-lru v0.0.0-20160813221303-0a025b7e63ad/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
