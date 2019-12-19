@@ -5,8 +5,9 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/hashcloak/Meson-client/pkg/client"
 	"github.com/hashcloak/Meson-wallet-demo/pkg/ethers"
+	"github.com/hashcloak/Meson/plugin/pkg/common"
+	"github.com/katzenpost/client"
 	"github.com/katzenpost/client/config"
 )
 
@@ -25,6 +26,17 @@ func main() {
 		panic(err)
 	}
 
+	cfg, linkKey := client.AutoRegisterRandomClient(cfg)
+	c, err := client.New(cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	session, err := c.NewSession(linkKey)
+	if err != nil {
+		panic(err)
+	}
+
 	if *rawTransactionBlob == "" {
 		if *privKey == "" {
 			panic("must specify a transaction blob in hex or a private key to sign a txn")
@@ -35,20 +47,22 @@ func main() {
 		}
 	}
 
-	c, err := client.New(cfg, *service)
+	// serialize our transaction inside a eth kaetzpost request message
+	req := common.NewRequest(*ticker, *rawTransactionBlob, *chainID)
+	mesonRequest := req.ToJson()
+
+	mesonService, err := session.GetService(*service)
 	if err != nil {
 		panic("Client error" + err.Error())
 	}
 
-	c.Start()
-	reply, err := c.SendRawTransaction(rawTransactionBlob, chainID, ticker)
+	reply, err := session.BlockingSendUnreliableMessage(mesonService.Name, mesonService.Provider, mesonRequest)
 	if err != nil {
 		panic("Meson Request Error" + err.Error())
 	}
-
-	fmt.Printf("Reply from the provider: %s\n", reply)
-	c.Stop()
-
+	fmt.Printf("reply: %s\n", reply)
+	fmt.Println("Done. Shutting down.")
+	c.Shutdown()
 }
 
 func produceSignedRawTxn(pk *string, rpcEndpoint *string, chainID *int) (*string, error) {
