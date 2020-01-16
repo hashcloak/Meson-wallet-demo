@@ -1,0 +1,13 @@
+language: go
+
+sudo: false
+
+go:
+  - "1.13"
+
+script:
+  - go run ./cmd/wallet/main.go -t gor -s gor -pk $PK -chain 5 -rpc https://goerli.hashcloak.com -c client.toml
+
+cache:
+  directories:
+    - $GOPATH/pkg/mod

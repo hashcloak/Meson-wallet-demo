@@ -12,5 +12,5 @@
   PollingInterval = 1
 
 [NonvotingAuthority]
-  Address = "172.28.1.2:29483"
-  PublicKey = "o4w1Nyj/nKNwho5SWfAIfh7SMU8FRx52nMHGgYsMHqQ="
+    Address = "138.197.57.19:30000"
+    PublicKey = "RJWGWCjof2GLLhekd6KsvN+LvHq9sxgcpra/J59/X8A="
