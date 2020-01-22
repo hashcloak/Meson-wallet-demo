@@ -5,8 +5,8 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/hashcloak/Meson-plugin/pkg/common"
 	"github.com/hashcloak/Meson-wallet-demo/pkg/ethers"
-	"github.com/hashcloak/Meson/plugin/pkg/common"
 	"github.com/katzenpost/client"
 	"github.com/katzenpost/client/config"
 )
