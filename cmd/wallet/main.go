@@ -18,7 +18,7 @@ func main() {
 	service := flag.String("s", "", "Service Name")
 	rawTransactionBlob := flag.String("rt", "", "Raw Transaction blob to send over the network")
 	privKey := flag.String("pk", "", "Private key used to sign the txn")
-	rpcEndpoint := flag.String("rpc", "http://172.28.1.10:9545", "Ethereum rpc endpoint")
+	rpcEndpoint := flag.String("rpc", "https://goerli.hashcloak.com", "Ethereum rpc endpoint")
 	flag.Parse()
 
 	cfg, err := config.LoadFile(*cfgFile)
@@ -43,12 +43,12 @@ func main() {
 		}
 		rawTransactionBlob, err = produceSignedRawTxn(privKey, rpcEndpoint, chainID)
 		if err != nil {
-			panic("Raw txn erro: " + err.Error())
+			panic("Raw txn error: " + err.Error())
 		}
 	}
 
 	// serialize our transaction inside a eth kaetzpost request message
-	req := common.NewRequest(*ticker, *rawTransactionBlob, *chainID)
+	req := common.NewRequest(*ticker, *rawTransactionBlob)
 	mesonRequest := req.ToJson()
 
 	mesonService, err := session.GetService(*service)
