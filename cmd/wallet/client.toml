@@ -1,0 +1,24 @@
+[UpstreamProxy]
+  Type = "none"
+
+[Logging]
+  Disable = false
+  Level = "DEBUG"
+  File = "meson/wallet/wallet.log"
+
+[Katzenmint]
+    ChainID = "katzenmint-chain-71DRoz"
+    PrimaryAddress = "tcp://104.131.108.194:26657"
+    WitnessesAddresses = ["165.227.158.164:26657", "165.227.90.185:26657", "104.131.108.194:26657"]
+    DatabaseName = "wallet_db"
+    DatabaseDir = "meson/wallet/data"
+    RPCAddress = "tcp://104.131.108.194:26657"
+
+    [Katzenmint.TrustOptions]
+      Period = 600000000000
+      Height = 23723
+      Hash = [108, 144, 96, 236, 119, 243, 64, 206, 14, 155, 64, 130, 93, 105, 178, 30, 41, 248, 176, 79, 148, 180, 183, 245, 25, 26, 46, 218, 240, 151, 70, 31]
+
+[Debug]
+  PollingInterval = 10
+  SessionDialTimeout = 1200000

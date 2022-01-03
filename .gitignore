@@ -11,5 +11,6 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-pk
-.makeFlags
+# Build and testing
+cmd/wallet/wallet
+cmd/wallet/meson

@@ -3,11 +3,12 @@ package ethers
 import (
 	"context"
 	"encoding/hex"
+	"math/big"
+
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"math/big"
 )
 
 // Ethers basic ethereum node interface
@@ -27,9 +28,9 @@ func SetURLAndChainID(rpcEndpoint string) (Ethers, error) {
 }
 
 // GenerateSignedRawTxn just signs a txn with
-func (e *Ethers) GenerateSignedRawTxn(pk string) (*string, error) {
+func (e *Ethers) GenerateSignedRawTxn(privKey string) (*string, error) {
 
-	key, err := crypto.HexToECDSA(pk)
+	key, err := crypto.HexToECDSA(privKey)
 	if err != nil {
 		return nil, err
 	}
