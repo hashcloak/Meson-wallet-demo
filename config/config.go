@@ -15,15 +15,10 @@ type Config struct {
 	Ticker string
 	// Service name
 	Service string
-	// Optional config
-	Optional *OptionalConfig
-}
-
-type OptionalConfig struct {
-	// Private key used to sign the txn
+	// Private key (in Hex form) used to sign the txn
 	PrivKey string
 	// Chain ID for specific ETH-based chain
-	ChainID int
+	ChainID int64
 	// Ethereum rpc endpoint
 	RpcEndpoint string
 }
@@ -37,9 +32,12 @@ func DefaultConfig() (cfg *Config) {
 // FixupAndValidate applies defaults to config entries and validates the
 // supplied configuration.  Most people should call one of the Load variants
 // instead.
-func (c *Config) FixupAndValidate() (err error) {
+func (c *Config) FixupAndValidate() error {
 	// TODO
-	return
+	if c.PrivKey == "" {
+		return fmt.Errorf("private key is empty")
+	}
+	return nil
 }
 
 // Load parses and validates the provided buffer b as a config file body and

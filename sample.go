@@ -6,17 +6,16 @@ import (
 	"github.com/hashcloak/Meson-wallet-demo/pkg/ethers"
 )
 
-func GenerateTransaction(wallet *Wallet) (*string, error) {
-	w := wallet.Config.Optional
-	ethers, err := ethers.SetURLAndChainID(w.RpcEndpoint)
+func GenerateTransaction(w *Wallet) (*string, error) {
+	ethers, err := ethers.SetURLAndChainID(w.Config.RpcEndpoint)
 	if err != nil {
 		return nil, err
 	}
 
-	if ethers.ChainID.Int64() != int64(w.ChainID) {
+	if ethers.ChainID.Int64() != int64(w.Config.ChainID) {
 		return nil, errors.New("ChainIDs are not the same between rpcEndpoint and chainID flag")
 	}
-	rawTxn, err := ethers.GenerateSignedRawTxn(w.PrivKey)
+	rawTxn, err := ethers.GenerateSignedRawTxn(w.Config.PrivKey)
 	if err != nil {
 		return nil, err
 	}

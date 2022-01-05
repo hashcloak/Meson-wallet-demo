@@ -62,6 +62,7 @@ func (e *Ethers) GenerateSignedRawTxn(privKey string) (*string, error) {
 	if err != nil {
 		return nil, err
 	}
-	txn := "0x" + hex.EncodeToString(types.Transactions{signedTx}.GetRlp(0))
+	raw, _ := signedTx.MarshalBinary()
+	txn := "0x" + hex.EncodeToString(raw)
 	return &txn, nil
 }
