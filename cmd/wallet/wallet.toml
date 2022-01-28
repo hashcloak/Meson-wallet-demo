@@ -1,0 +1,38 @@
+KSLocation="/tmp/meson-wallet/keystore"
+ChainID=5
+Endpoint="https://goerli-light.eth.linkpool.io"
+Ticker="gor"
+Service="meson"
+
+[Meson]
+
+  [Meson.Logging]
+    Disable = false
+    File = "/tmp/meson-wallet/wallet.log"
+    Level = "DEBUG"
+
+  [Meson.UpstreamProxy]
+    Type = "none"
+    Network = ""
+    Address = ""
+    User = ""
+    Password = ""
+
+  [Meson.Debug]
+    DisableDecoyTraffic = false
+    SessionDialTimeout = 1200000
+    InitialMaxPKIRetrievalDelay = 30
+    CaseSensitiveUserIdentifiers = false
+    PollingInterval = 100
+
+  [Meson.Katzenmint]
+    ChainID = "test-chain-QvpdAC"
+    PrimaryAddress = "tcp://127.0.0.1:20017"
+    WitnessesAddresses = ["127.0.0.1:20017"]
+    DatabaseName = "wallet_db"
+    DatabaseDir = "/tmp/meson-wallet/db"
+    RPCAddress = "tcp://127.0.0.1:20017"
+    [Meson.Katzenmint.TrustOptions]
+      Period = 600000000000
+      Height = 1
+      Hash = [127, 220, 217, 253, 88, 37, 197, 138, 103, 235, 93, 91, 74, 27, 29, 57, 110, 46, 119, 231, 15, 29, 149, 61, 165, 45, 132, 61, 134, 32, 151, 36]

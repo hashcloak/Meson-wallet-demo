@@ -9,3 +9,7 @@ lint:
 	$(GOPATH)/bin/golangci-lint run --timeout 2m0s -e gosec ./...
 	go fmt ./...
 	go mod tidy
+
+.PHONY: build
+build:
+	go build ./cmd/wallet

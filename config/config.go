@@ -6,38 +6,29 @@ import (
 	"os"
 
 	"github.com/BurntSushi/toml"
+	mcConfig "github.com/hashcloak/Meson/client/config"
 )
 
 type Config struct {
-	// Path to the client config file
-	ClientCfgFile string
-	// Ticker
-	Ticker string
-	// Service name
-	Service string
-	// Private key (in Hex form) used to sign the txn
-	PrivKey string
-	// Chain ID for specific ETH-based chain
-	ChainID int64
-	// Ethereum rpc endpoint
-	RpcEndpoint string
-}
-
-func DefaultConfig() (cfg *Config) {
-	cfg = new(Config)
-	_ = cfg.FixupAndValidate()
-	return
+	KSLocation string
+	ChainID    int64
+	Endpoint   string
+	Ticker     string
+	Service    string
+	Meson      *mcConfig.Config
 }
 
 // FixupAndValidate applies defaults to config entries and validates the
 // supplied configuration.  Most people should call one of the Load variants
 // instead.
 func (c *Config) FixupAndValidate() error {
-	// TODO
-	if c.PrivKey == "" {
-		return fmt.Errorf("private key is empty")
+	if info, err := os.Stat(c.KSLocation); err != nil || !info.IsDir() {
+		return fmt.Errorf("error key store location \"%s\"", c.KSLocation)
 	}
-	return nil
+	if c.Meson == nil {
+		return fmt.Errorf("missing meson config")
+	}
+	return c.Meson.FixupAndMinimallyValidate()
 }
 
 // Load parses and validates the provided buffer b as a config file body and
@@ -68,12 +59,12 @@ func LoadFile(f string) (*Config, error) {
 }
 
 // SaveFile saves the config to the provided file
-func SaveFile(f string, config *Config) error {
-	file, err := os.Create(f)
+func (c *Config) SaveFile(fileName string) error {
+	f, err := os.Create(fileName)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
-	enc := toml.NewEncoder(file)
-	return enc.Encode(config)
+	defer f.Close()
+	enc := toml.NewEncoder(f)
+	return enc.Encode(c)
 }

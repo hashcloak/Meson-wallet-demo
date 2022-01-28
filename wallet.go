@@ -1,46 +1,51 @@
 package wallet
 
 import (
+	"encoding/hex"
 	"fmt"
 
-	client "github.com/hashcloak/Meson-client"
-	cConfig "github.com/hashcloak/Meson-client/config"
+	ks "github.com/ethereum/go-ethereum/accounts/keystore"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/hashcloak/Meson-plugin/pkg/common"
-	wConfig "github.com/hashcloak/Meson-wallet-demo/config"
+	config "github.com/hashcloak/Meson-wallet-demo/config"
+	client "github.com/hashcloak/Meson/client"
 )
 
 type Wallet struct {
+	*ks.KeyStore
+
 	// wallet config
-	Config *wConfig.Config
+	config *config.Config
 	// meson client
 	client *client.Client
 	// meson session
 	session *client.Session
 }
 
-func New(walletCfgFile string) (wallet *Wallet, err error) {
+func New(CfgFile string) (wallet *Wallet, err error) {
 	wallet = new(Wallet)
-	wallet.Config, err = wConfig.LoadFile(walletCfgFile)
+
+	// Setup wallet config
+	wallet.config, err = config.LoadFile(CfgFile)
 	if err != nil {
 		return nil, err
 	}
-	clientCfg, err := cConfig.LoadFile(wallet.Config.ClientCfgFile)
+
+	// Setup wallet keystore
+	wallet.KeyStore = ks.NewKeyStore(wallet.config.KSLocation, ks.StandardScryptN, ks.StandardScryptP)
+
+	// Setup wallet client
+	err = wallet.config.Meson.UpdateTrust()
 	if err != nil {
 		return nil, err
 	}
-	err = cConfig.UpdateTrust(clientCfg)
+	linkKey := client.AutoRegisterRandomClient(wallet.config.Meson)
+	wallet.client, err = client.New(wallet.config.Meson, wallet.config.Service)
 	if err != nil {
 		return nil, err
 	}
-	clientCfg, linkKey := client.AutoRegisterRandomClient(clientCfg)
-	err = clientCfg.SaveConfig(wallet.Config.ClientCfgFile)
-	if err != nil {
-		return nil, err
-	}
-	wallet.client, err = client.New(wallet.Config.ClientCfgFile, wallet.Config.Service)
-	if err != nil {
-		return nil, err
-	}
+
+	// Setup wallet session
 	wallet.session, err = wallet.client.NewSession(linkKey)
 	if err != nil {
 		return nil, err
@@ -48,18 +53,35 @@ func New(walletCfgFile string) (wallet *Wallet, err error) {
 	return wallet, nil
 }
 
-func (wallet *Wallet) Send(rawTransactionBlob string) ([]byte, error) {
+func (wallet *Wallet) Send(tx *types.Transaction) (string, error) {
+	blobByte, _ := tx.MarshalBinary()
+	blobString := "0x" + hex.EncodeToString(blobByte)
+
 	// serialize our transaction inside a eth kaetzpost request message
-	req := common.NewRequest(wallet.Config.Ticker, rawTransactionBlob)
+	req := common.NewRequest(wallet.config.Ticker, blobString)
 	mesonRequest := req.ToJson()
-	mesonService, err := wallet.session.GetService(wallet.Config.Service)
+	mesonService, err := wallet.session.GetService(wallet.config.Service)
 	if err != nil {
-		return nil, fmt.Errorf("client error: %v", err)
+		return "", fmt.Errorf("client error: %v", err)
 	}
-	return wallet.session.BlockingSendUnreliableMessage(mesonService.Name, mesonService.Provider, mesonRequest)
+	reply, err := wallet.session.BlockingSendUnreliableMessage(mesonService.Name, mesonService.Provider, mesonRequest)
+	if err != nil {
+		return "", fmt.Errorf("send error: %v", err)
+	}
+	return common.ResponseFromJson(reply)
+}
+
+func (wallet *Wallet) ChainID() int64 {
+	return wallet.config.ChainID
+}
+
+func (wallet *Wallet) Endpoint() string {
+	return wallet.config.Endpoint
 }
 
 func (wallet *Wallet) Close() {
-	wallet.session.Shutdown()
 	wallet.client.Shutdown()
+	for _, account := range wallet.Accounts() {
+		_ = wallet.Lock(account.Address)
+	}
 }
