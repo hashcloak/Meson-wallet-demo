@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	wallet "github.com/hashcloak/Meson-wallet-demo"
 )
 
-func DemoSetup(w *wallet.Wallet) {
+func DemoSetup(w *wallet.Wallet) common.Address {
 	var passphrase string
 
 	if len(w.Accounts()) == 0 {
@@ -24,22 +26,16 @@ func DemoSetup(w *wallet.Wallet) {
 			panic(err)
 		}
 		fmt.Printf("Account created with address %v\n", ac.Address)
+	} else {
+		fmt.Printf("Using account %v\n", w.Accounts()[0].Address)
 	}
+	return w.Accounts()[0].Address
 }
 
-func DemoSend(w *wallet.Wallet) (err error) {
+func DemoSend(w *wallet.Wallet, tx *types.Transaction) (err error) {
 	var passphrase string
 
-	if len(w.Accounts()) == 0 {
-		return fmt.Errorf("no accounts being set")
-	}
 	ac := w.Accounts()[0]
-	addr := ac.Address
-	fmt.Printf("Using account %v\n", addr)
-	tx, err := wallet.GenerateTx(addr, addr, w.ChainID(), w.Endpoint())
-	if err != nil {
-		return
-	}
 	fmt.Print("Enter passphrase: ")
 	_, err = fmt.Scanf("%s", &passphrase)
 	if err != nil {
