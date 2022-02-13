@@ -11,6 +11,8 @@ import (
 	client "github.com/hashcloak/Meson/client"
 )
 
+const mesonService = "meson"
+
 type Wallet struct {
 	*ks.KeyStore
 
@@ -22,66 +24,72 @@ type Wallet struct {
 	session *client.Session
 }
 
-func New(CfgFile string) (wallet *Wallet, err error) {
-	wallet = new(Wallet)
+func New(CfgFile string) (w *Wallet, err error) {
+	w = new(Wallet)
 
 	// Setup wallet config
-	wallet.config, err = config.LoadFile(CfgFile)
+	w.config, err = config.LoadFile(CfgFile)
 	if err != nil {
 		return nil, err
 	}
 
 	// Setup wallet keystore
-	wallet.KeyStore = ks.NewKeyStore(wallet.config.KSLocation, ks.StandardScryptN, ks.StandardScryptP)
+	w.KeyStore = ks.NewKeyStore(w.config.KSLocation, ks.StandardScryptN, ks.StandardScryptP)
 
 	// Setup wallet client
-	err = wallet.config.Meson.UpdateTrust()
+	err = w.config.Meson.UpdateTrust()
 	if err != nil {
 		return nil, err
 	}
-	linkKey := client.AutoRegisterRandomClient(wallet.config.Meson)
-	wallet.client, err = client.New(wallet.config.Meson, wallet.config.Service)
+	linkKey := client.AutoRegisterRandomClient(w.config.Meson)
+	w.client, err = client.New(w.config.Meson, mesonService)
 	if err != nil {
 		return nil, err
 	}
 
 	// Setup wallet session
-	wallet.session, err = wallet.client.NewSession(linkKey)
+	w.session, err = w.client.NewSession(linkKey)
 	if err != nil {
 		return nil, err
 	}
-	return wallet, nil
+
+	// Initialize with UI
+	err = w.uiSetup()
+	if err != nil {
+		return nil, err
+	}
+
+	return w, nil
 }
 
-func (wallet *Wallet) Send(tx *types.Transaction) (string, error) {
+func (w *Wallet) Send(tx *types.Transaction) (string, error) {
 	blobByte, _ := tx.MarshalBinary()
 	blobString := "0x" + hex.EncodeToString(blobByte)
 
 	// serialize our transaction inside a eth kaetzpost request message
-	req := common.NewRequest(wallet.config.Ticker, blobString)
-	mesonRequest := req.ToJson()
-	mesonService, err := wallet.session.GetService(wallet.config.Service)
+	req := common.NewRequest(w.Ticker(tx.ChainId().Int64()), blobString).ToJson()
+	service, err := w.session.GetService(mesonService)
 	if err != nil {
 		return "", fmt.Errorf("client error: %v", err)
 	}
-	reply, err := wallet.session.BlockingSendUnreliableMessage(mesonService.Name, mesonService.Provider, mesonRequest)
+	reply, err := w.session.BlockingSendUnreliableMessage(service.Name, service.Provider, req)
 	if err != nil {
 		return "", fmt.Errorf("send error: %v", err)
 	}
 	return common.ResponseFromJson(reply)
 }
 
-func (wallet *Wallet) ChainID() int64 {
-	return wallet.config.ChainID
+func (w *Wallet) Ticker(chainID int64) string {
+	return w.config.Chain[fmt.Sprint(chainID)].Ticker
 }
 
-func (wallet *Wallet) Endpoint() string {
-	return wallet.config.Endpoint
+func (w *Wallet) Endpoint(chainID int64) string {
+	return w.config.Chain[fmt.Sprint(chainID)].Endpoint
 }
 
-func (wallet *Wallet) Close() {
-	wallet.client.Shutdown()
-	for _, account := range wallet.Accounts() {
-		_ = wallet.Lock(account.Address)
+func (w *Wallet) Close() {
+	w.client.Shutdown()
+	for _, account := range w.Accounts() {
+		_ = w.Lock(account.Address)
 	}
 }

@@ -10,12 +10,10 @@ import (
 )
 
 type Config struct {
-	KSLocation string
-	ChainID    int64
-	Endpoint   string
-	Ticker     string
-	Service    string
-	Meson      *mcConfig.Config
+	KSLocation     string
+	DefaultChainID int64
+	Chain          map[string]struct{ Ticker, Endpoint string }
+	Meson          *mcConfig.Config
 }
 
 // FixupAndValidate applies defaults to config entries and validates the
@@ -24,6 +22,9 @@ type Config struct {
 func (c *Config) FixupAndValidate() error {
 	if info, err := os.Stat(c.KSLocation); err != nil || !info.IsDir() {
 		return fmt.Errorf("error key store location \"%s\"", c.KSLocation)
+	}
+	if _, ok := c.Chain[fmt.Sprint(c.DefaultChainID)]; !ok {
+		return fmt.Errorf("missing ticker/endpoint for the default chain id")
 	}
 	if c.Meson == nil {
 		return fmt.Errorf("missing meson config")

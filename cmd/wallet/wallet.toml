@@ -1,8 +1,10 @@
-KSLocation="/tmp/meson-wallet/keystore"
-ChainID=5
-Endpoint="https://goerli-light.eth.linkpool.io"
-Ticker="gor"
-Service="meson"
+KSLocation = "/tmp/meson-wallet/keystore"
+DefaultChainID = 5
+
+[Chain]
+  [Chain.5]
+    Ticker = "gor"
+    Endpoint = "https://eth-goerli.alchemyapi.io/v2/jqsuIPSy2H37gIaG8PWyjtvAaZWtMmY2"
 
 [Meson]
 

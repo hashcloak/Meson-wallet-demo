@@ -3,42 +3,55 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
+	"math/big"
+	"net/http"
+	"os"
 
-	"github.com/ethereum/go-ethereum/common"
 	wallet "github.com/hashcloak/Meson-wallet-demo"
 )
 
 func main() {
 	walletCfgFile := flag.String("w", "wallet.toml", "Wallet config file")
+	setListen := flag.Bool("l", false, "Listen and serve")
+	setChainID := flag.Int64("c", 5, "Chain ID")
 	setReceiver := flag.String("a", "", "Address of the receiver")
-	setAmount := flag.Int64("v", 10, "Value transfered")
-	setData := flag.String("d", "", "Data appended")
+	setValue := flag.String("v", "10", "Value to transfer")
+	setData := flag.String("d", "", "Data to append")
 	flag.Parse()
 
 	w, err := wallet.New(*walletCfgFile)
 	if err != nil {
 		panic(err)
 	}
-	sender := DemoSetup(w)
-	receiver := sender // default receiver
-	if *setReceiver != "" {
-		receiver = common.HexToAddress(*setReceiver)
+	defer w.Close()
+	if *setListen {
+		http.HandleFunc("/tx", func(resp http.ResponseWriter, req *http.Request) {
+			wallet.TransactionHandler(w, resp, req)
+		})
+		log.Fatal(http.ListenAndServe(":18545", nil))
+
+	} else {
+		fmt.Println("Testing ...")
+		value := &big.Int{}
+		if *setReceiver == "" {
+			*setReceiver = w.UiSelectAccount().Address.Hex()
+		}
+		if _, ok := value.SetString(*setValue, 10); !ok {
+			fmt.Println("value is invalid")
+			os.Exit(0)
+		}
+		request := wallet.TransactionRequest{
+			ChainID: *setChainID,
+			To:      *setReceiver,
+			Value:   value,
+			Data:    *setData,
+		}
+		reply, err := wallet.ProcessRequest(w, request)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(0)
+		}
+		fmt.Println(reply)
 	}
-	tx, err := wallet.GenerateTx(
-		sender,
-		receiver,
-		*setAmount,
-		common.FromHex(*setData),
-		w.ChainID(),
-		w.Endpoint(),
-	)
-	if err != nil {
-		panic(err)
-	}
-	err = DemoSend(w, tx)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("Done. Shutting down.")
-	w.Close()
 }

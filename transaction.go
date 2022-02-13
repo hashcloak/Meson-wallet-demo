@@ -11,11 +11,12 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-func GenerateTx(from common.Address, to common.Address, value int64, data []byte, chainID int64, rpcEndpoint string) (*types.Transaction, error) {
+func GenerateTransaction(from common.Address, to common.Address, value *big.Int, data []byte, chainID int64, rpcEndpoint string) (*types.Transaction, error) {
 	ethclient, err := ethclient.Dial(rpcEndpoint)
 	if err != nil {
 		return nil, err
 	}
+	defer ethclient.Close()
 	recvChainID, err := ethclient.ChainID(context.Background())
 	if err != nil {
 		return nil, err
@@ -36,7 +37,7 @@ func GenerateTx(from common.Address, to common.Address, value int64, data []byte
 	}
 	gasEstimate, err := ethclient.EstimateGas(context.Background(), ethereum.CallMsg{
 		To:    &to,
-		Value: big.NewInt(value),
+		Value: value,
 		Data:  data,
 	})
 	if err != nil {
@@ -46,7 +47,7 @@ func GenerateTx(from common.Address, to common.Address, value int64, data []byte
 		ChainID:  recvChainID,
 		Nonce:    nonce,
 		To:       &to,
-		Value:    big.NewInt(value),
+		Value:    value,
 		Gas:      gasEstimate * 11 / 10,
 		GasPrice: gasPrice,
 		Data:     data,
