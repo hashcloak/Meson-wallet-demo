@@ -11,6 +11,8 @@ import (
 	wallet "github.com/hashcloak/Meson-wallet-demo"
 )
 
+const listenPort = ":18545"
+
 func main() {
 	walletCfgFile := flag.String("w", "wallet.toml", "Wallet config file")
 	setListen := flag.Bool("l", false, "Listen and serve")
@@ -26,14 +28,15 @@ func main() {
 	}
 	defer w.Close()
 	if *setListen {
+		fmt.Println("Listening on port", listenPort[1:])
 		http.HandleFunc("/tx", func(resp http.ResponseWriter, req *http.Request) {
 			wallet.TransactionHandler(w, resp, req)
 		})
-		log.Fatal(http.ListenAndServe(":18545", nil))
+		log.Fatal(http.ListenAndServe(listenPort, nil))
 
 	} else {
 		fmt.Println("Testing ...")
-		value := &big.Int{}
+		value := big.Int{}
 		if *setReceiver == "" {
 			*setReceiver = w.UiSelectAccount().Address.Hex()
 		}

@@ -12,7 +12,7 @@ import (
 type TransactionRequest struct {
 	ChainID int64
 	To      string
-	Value   *big.Int
+	Value   big.Int
 	Data    string
 }
 
@@ -21,7 +21,7 @@ func ProcessRequest(w *Wallet, request TransactionRequest) (reply string, err er
 	tx, err := GenerateTransaction(
 		account.Address,
 		common.HexToAddress(request.To),
-		request.Value,
+		&request.Value,
 		common.FromHex(request.Data),
 		request.ChainID,
 		w.Endpoint(request.ChainID),
@@ -54,8 +54,10 @@ func TransactionHandler(w *Wallet, resp http.ResponseWriter, req *http.Request) 
 	}
 	reply, err := ProcessRequest(w, *request)
 	if err != nil {
-		http.Error(resp, err.Error(), http.StatusInternalServerError)
+		fmt.Printf("Failed to process: %v\n\n", err)
+		http.Error(resp, "Failed to process transaction", http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(reply)
+	fmt.Printf("%s\n\n", reply)
+	_, _ = resp.Write([]byte(reply))
 }
