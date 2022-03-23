@@ -6,9 +6,9 @@ import (
 
 	ks "github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/hashcloak/Meson-plugin/pkg/common"
 	config "github.com/hashcloak/Meson-wallet-demo/config"
 	client "github.com/hashcloak/Meson/client"
+	"github.com/hashcloak/Meson/plugin/pkg/common"
 )
 
 const mesonService = "meson"

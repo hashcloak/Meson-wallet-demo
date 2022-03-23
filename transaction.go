@@ -26,6 +26,7 @@ func GenerateTransaction(from common.Address, to common.Address, value *big.Int,
 	}
 	/*
 	 * This is somewhere we need more privacy protection in the future
+	 * TODO: Turn all queries to ethclient (above & below) into 1 query in meson
 	 */
 	nonce, err := ethclient.PendingNonceAt(context.Background(), from)
 	if err != nil {
