@@ -18,13 +18,12 @@ type TransactionRequest struct {
 
 func ProcessRequest(w *Wallet, request TransactionRequest) (reply string, err error) {
 	account := w.UiSelectAccount()
-	tx, err := GenerateTransaction(
+	tx, err := w.FillTx(
 		account.Address,
 		common.HexToAddress(request.To),
 		&request.Value,
-		common.FromHex(request.Data),
+		request.Data,
 		request.ChainID,
-		w.Endpoint(request.ChainID),
 	)
 	if err != nil {
 		return "", err
@@ -38,7 +37,7 @@ func ProcessRequest(w *Wallet, request TransactionRequest) (reply string, err er
 	if err != nil {
 		return "", err
 	}
-	reply, err = w.Send(signedTx)
+	reply, err = w.SendTx(signedTx)
 	if err != nil {
 		return "", err
 	}

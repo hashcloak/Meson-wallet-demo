@@ -11,6 +11,8 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
+// GenerateTransaction queries RPC directly to get nonce, gasprice, gaslimit
+// We recommend using (*Wallet).FillTx() instead for more privacy
 func GenerateTransaction(from common.Address, to common.Address, value *big.Int, data []byte, chainID int64, rpcEndpoint string) (*types.Transaction, error) {
 	ethclient, err := ethclient.Dial(rpcEndpoint)
 	if err != nil {
@@ -24,10 +26,6 @@ func GenerateTransaction(from common.Address, to common.Address, value *big.Int,
 	if recvChainID.Int64() != chainID {
 		return nil, fmt.Errorf("chain ID mismatch")
 	}
-	/*
-	 * This is somewhere we need more privacy protection in the future
-	 * TODO: Turn all queries to ethclient (above & below) into 1 query in meson
-	 */
 	nonce, err := ethclient.PendingNonceAt(context.Background(), from)
 	if err != nil {
 		return nil, err
@@ -49,7 +47,7 @@ func GenerateTransaction(from common.Address, to common.Address, value *big.Int,
 		Nonce:    nonce,
 		To:       &to,
 		Value:    value,
-		Gas:      gasEstimate * 11 / 10,
+		Gas:      gasEstimate,
 		GasPrice: gasPrice,
 		Data:     data,
 	})
