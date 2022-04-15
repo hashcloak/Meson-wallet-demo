@@ -22,7 +22,7 @@ const { GasPriceOracle } = require('gas-price-oracle')
 const SocksProxyAgent = require('socks-proxy-agent')
 
 let web3, tornado, tornadoContract, tornadoInstance, circuit, proving_key, groth16, erc20, senderAccount, netId, netName, netSymbol, isLocalNode
-let MERKLE_TREE_HEIGHT, ETH_AMOUNT, TOKEN_AMOUNT, PRIVATE_KEY
+let MERKLE_TREE_HEIGHT, ETH_AMOUNT, TOKEN_AMOUNT
 
 /** Whether we are in a browser or node.js */
 const inBrowser = typeof window !== 'undefined'
@@ -69,70 +69,20 @@ async function submitTransaction(signedTX) {
 }
 
 async function generateTransaction(to, encodedData, value = 0) {
-  const nonce = await web3.eth.getTransactionCount(senderAccount)
-  const gasPrice = await fetchGasPrice()
-  let gasLimit;
+  console.log(`Transaction to ${to} on chain ${netId}`)
 
-  async function estimateGas() {
-    const fetchedGas = await web3.eth.estimateGas({
-      from  : senderAccount,
-      to    : to,
-      value : value,
-      nonce : nonce,
-      data  : encodedData
-    })
-    const bumped = Math.floor(fetchedGas * 1.3)
-    return web3.utils.toHex(bumped)
-  }
-  if (encodedData) {
-    gasLimit = await estimateGas();
-  } else {
-    gasLimit = web3.utils.toHex(21000);
-  }
-
-  async function txoptions() {
-    // Generate EIP-1559 transaction
-    if (netId == 1) {
-      return {
-        to                   : to,
-        value                : value,
-        nonce                : nonce,
-        maxFeePerGas         : gasPrice,
-        maxPriorityFeePerGas : web3.utils.toHex(web3.utils.toWei('3', 'gwei')),
-        gas                  : gasLimit,
-        data                 : encodedData
-      }
-    } else if (netId == 5 || netId == 137 || netId == 43114) {
-      return {
-        to                   : to,
-        value                : value,
-        nonce                : nonce,
-        maxFeePerGas         : gasPrice,
-        maxPriorityFeePerGas : gasPrice,
-        gas                  : gasLimit,
-        data                 : encodedData
-      }
-    } else {
-      return {
-        to       : to,
-        value    : value,
-        nonce    : nonce,
-        gasPrice : gasPrice,
-        gas      : gasLimit,
-        data     : encodedData
-      }
-    }
-  }
-  const tx = await txoptions();
-  const signed = await web3.eth.accounts.signTransaction(tx, PRIVATE_KEY);
-  if (!isLocalNode) {
-    await submitTransaction(signed.rawTransaction);
-  } else {
-    console.log('\n=============Raw TX=================','\n')
-    console.log(`Please submit this raw tx to https://${getExplorerLink()}/pushTx, or otherwise broadcast with node cli.js broadcast command.`,`\n`)
-    console.log(signed.rawTransaction,`\n`)
-    console.log('=====================================','\n')
-  }
+  await axios.post('tcp://127.0.0.1:18545/tx', {
+    ChainId: netId,
+    To: to,
+    Value: Number(value),
+    Data: encodedData,
+  })
+  .then(res => {
+    console.log(res.data)
+  })
+  .catch(error => {
+    throw error.response.data
+  })
 }
 
 /**
@@ -163,7 +113,7 @@ async function backupNote({ currency, amount, netId, note, noteString }) {
  * @param amount Deposit amount
  */
 async function deposit({ currency, amount }) {
-  assert(senderAccount != null, 'Error! PRIVATE_KEY not found. Please provide PRIVATE_KEY in .env file if you deposit')
+  assert(senderAccount != null, 'Please provide SENDER_ACCOUNT in .env file if you deposit')
   const deposit = createDeposit({
     nullifier: rbigint(31),
     secret: rbigint(31)
@@ -171,7 +121,6 @@ async function deposit({ currency, amount }) {
   const note = toHex(deposit.preimage, 62)
   const noteString = `tornado-${currency}-${amount}-${netId}-${note}`
   console.log(`Your note: ${noteString}`)
-  await backupNote({ currency, amount, netId, note, noteString })
   if (currency === netSymbol.toLowerCase()) {
     await printETHBalance({ address: tornadoContract._address, name: 'Tornado contract' })
     await printETHBalance({ address: senderAccount, name: 'Sender account' })
@@ -204,6 +153,7 @@ async function deposit({ currency, amount }) {
     await printERC20Balance({ address: senderAccount, name: 'Sender account' })
   }
 
+  await backupNote({ currency, amount, netId, note, noteString })
   return noteString
 }
 
@@ -352,10 +302,9 @@ async function withdraw({ deposit, currency, amount, recipient, relayerURL, torP
       }
     }
   } else {
-    // using private key
 
-    // check if the address of recepient matches with the account of provided private key from environment to prevent accidental use of deposit address for withdrawal transaction.
-    assert(recipient.toLowerCase() == senderAccount.toLowerCase(), 'Withdrawal recepient mismatches with the account of provided private key from environment file')
+    // check if the address of recepient matches with the account from environment to prevent accidental use of deposit address for withdrawal transaction.
+    assert(recipient.toLowerCase() == senderAccount.toLowerCase(), 'Withdrawal recepient mismatches with the account from environment file')
     const checkBalance = await web3.eth.getBalance(senderAccount)
     assert(checkBalance !== 0, 'You have 0 balance, make sure to fund account by withdrawing from tornado using relayer first')
 
@@ -379,8 +328,7 @@ async function withdraw({ deposit, currency, amount, recipient, relayerURL, torP
  * @param tokenAddress ERC20 token address
  */
 async function send({ address, amount, tokenAddress }) {
-  // using private key
-  assert(senderAccount != null, 'Error! PRIVATE_KEY not found. Please provide PRIVATE_KEY in .env file if you send')
+  assert(senderAccount != null, 'Please provide SENDER_ACCOUNT in .env file if you send')
   if (tokenAddress) {
     const erc20ContractJson = require('./build/contracts/ERC20Mock.json')
     erc20 = new web3.eth.Contract(erc20ContractJson.abi, tokenAddress)
@@ -959,20 +907,7 @@ async function init({ rpc, noteNetId, currency = 'dai', amount = '100', torPort,
     MERKLE_TREE_HEIGHT = process.env.MERKLE_TREE_HEIGHT || 20
     ETH_AMOUNT = process.env.ETH_AMOUNT
     TOKEN_AMOUNT = process.env.TOKEN_AMOUNT
-    const privKey = process.env.PRIVATE_KEY
-    if (privKey) {
-      if (privKey.includes("0x")) {
-        PRIVATE_KEY = process.env.PRIVATE_KEY.substring(2)
-      } else {
-        PRIVATE_KEY = process.env.PRIVATE_KEY
-      }
-    }
-    if (PRIVATE_KEY) {
-      const account = web3.eth.accounts.privateKeyToAccount('0x' + PRIVATE_KEY)
-      web3.eth.accounts.wallet.add('0x' + PRIVATE_KEY)
-      web3.eth.defaultAccount = account.address
-      senderAccount = account.address
-    }
+    senderAccount = process.env.SENDER_ACCOUNT
     erc20ContractJson = require('./build/contracts/ERC20Mock.json')
     erc20tornadoJson = require('./build/contracts/ERC20Tornado.json')
   }
@@ -1078,7 +1013,7 @@ async function main() {
       .action(async (address, tokenAddress) => {
         await init({ rpc: program.rpc, torPort: program.tor, balanceCheck: true })
         if (!address && senderAccount) {
-          console.log("Using address",senderAccount,"from private key")
+          console.log("Using address",senderAccount,"from .env")
           address = senderAccount;
         }
         await printETHBalance({ address, name: 'Account' })
