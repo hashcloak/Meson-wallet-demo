@@ -1,79 +1,60 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
+	"log"
+	"math/big"
+	"net/http"
+	"os"
 
-	"github.com/hashcloak/Meson-plugin/pkg/common"
-	"github.com/hashcloak/Meson-wallet-demo/pkg/ethers"
-	"github.com/katzenpost/client"
-	"github.com/katzenpost/client/config"
+	wallet "github.com/hashcloak/Meson-wallet-demo"
 )
 
+const listenPort = ":18545"
+
 func main() {
-	cfgFile := flag.String("c", "client.toml", "Path to the server config file")
-	ticker := flag.String("t", "", "Ticker")
-	chainID := flag.Int("chain", 1, "Chain ID for specific ETH-based chain")
-	service := flag.String("s", "", "Service Name")
-	rawTransactionBlob := flag.String("rt", "", "Raw Transaction blob to send over the network")
-	privKey := flag.String("pk", "", "Private key used to sign the txn")
-	rpcEndpoint := flag.String("rpc", "http://172.28.1.10:9545", "Ethereum rpc endpoint")
+	walletCfgFile := flag.String("w", "wallet.toml", "Wallet config file")
+	setListen := flag.Bool("l", false, "Listen and serve")
+	setChainID := flag.Int64("c", 5, "Chain ID")
+	setReceiver := flag.String("a", "", "Address of the receiver")
+	setValue := flag.String("v", "10", "Value to transfer")
+	setData := flag.String("d", "", "Data to append")
 	flag.Parse()
 
-	cfg, err := config.LoadFile(*cfgFile)
+	w, err := wallet.New(*walletCfgFile)
 	if err != nil {
 		panic(err)
 	}
+	defer w.Close()
+	if *setListen {
+		fmt.Println("Listening on port", listenPort[1:])
+		http.HandleFunc("/tx", func(resp http.ResponseWriter, req *http.Request) {
+			wallet.TransactionHandler(w, resp, req)
+		})
+		log.Fatal(http.ListenAndServe(listenPort, nil))
 
-	cfg, linkKey := client.AutoRegisterRandomClient(cfg)
-	c, err := client.New(cfg)
-	if err != nil {
-		panic(err)
-	}
-
-	session, err := c.NewSession(linkKey)
-	if err != nil {
-		panic(err)
-	}
-
-	if *rawTransactionBlob == "" {
-		if *privKey == "" {
-			panic("must specify a transaction blob in hex or a private key to sign a txn")
+	} else {
+		fmt.Println("Testing ...")
+		value := big.Int{}
+		if *setReceiver == "" {
+			*setReceiver = w.UiSelectAccount().Address.Hex()
 		}
-		rawTransactionBlob, err = produceSignedRawTxn(privKey, rpcEndpoint, chainID)
+		if _, ok := value.SetString(*setValue, 10); !ok {
+			fmt.Println("value is invalid")
+			os.Exit(0)
+		}
+		request := wallet.TransactionRequest{
+			ChainID: *setChainID,
+			To:      *setReceiver,
+			Value:   value,
+			Data:    *setData,
+		}
+		reply, err := wallet.ProcessRequest(w, request)
 		if err != nil {
-			panic("Raw txn erro: " + err.Error())
+			fmt.Println(err)
+			os.Exit(0)
 		}
+		fmt.Println(reply)
 	}
-
-	// serialize our transaction inside a eth kaetzpost request message
-	req := common.NewRequest(*ticker, *rawTransactionBlob, *chainID)
-	mesonRequest := req.ToJson()
-
-	mesonService, err := session.GetService(*service)
-	if err != nil {
-		panic("Client error" + err.Error())
-	}
-
-	reply, err := session.BlockingSendUnreliableMessage(mesonService.Name, mesonService.Provider, mesonRequest)
-	if err != nil {
-		panic("Meson Request Error" + err.Error())
-	}
-	fmt.Printf("reply: %s\n", reply)
-	fmt.Println("Done. Shutting down.")
-	c.Shutdown()
-}
-
-func produceSignedRawTxn(pk *string, rpcEndpoint *string, chainID *int) (*string, error) {
-	ethers, err := ethers.SetURLAndChainID(*rpcEndpoint)
-	if err != nil {
-		return nil, err
-	}
-
-	if ethers.ChainID.Int64() != int64(*chainID) {
-		return nil, errors.New("ChainIDs are not the same between rpcEndpoint and chainID flag")
-	}
-	rawTxn, err := ethers.GenerateSignedRawTxn(*pk)
-	return rawTxn, nil
 }

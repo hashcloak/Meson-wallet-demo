@@ -1,21 +1,15 @@
-flags=.makeFlags
-VPATH=$(flags)
-$(shell mkdir -p $(flags))
+GOPATH=$(shell go env GOPATH)
 
-all: build
+.PHONY: default
+default: lint
 
-clean:
-	rm -rf ./.makeFlags
+.PHONY: lint
+lint:
+	go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.42.0
+	$(GOPATH)/bin/golangci-lint run --timeout 2m0s -e gosec ./...
+	go fmt ./...
+	go mod tidy
 
+.PHONY: build
 build:
-	docker build -t hashcloak/meson-wallet -f Dockerfile .
-
-send-txn: build
-	docker run \
-		--network nonvoting_testnet_nonvoting_test_net \
-		hashcloak/meson-wallet \
-		/wallet \
-		-pk $(shell cat ./pk) \
-		-t gor \
-		-s gor \
-		-chain 5
+	go build ./cmd/wallet

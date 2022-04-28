@@ -3,8 +3,10 @@ module github.com/hashcloak/Meson-wallet-demo
 go 1.13
 
 require (
-	github.com/ethereum/go-ethereum v1.9.8
-	github.com/hashcloak/Meson-client v0.0.0-20191203233537-dc6d4bdd3049
-	github.com/hashcloak/Meson-plugin v0.0.0-20200122032451-3f486b0607e5
-	github.com/katzenpost/client v0.0.3-0.20191109165001-aa02bb21ca21
+	github.com/BurntSushi/toml v1.0.0
+	github.com/StackExchange/wmi v1.2.1 // indirect
+	github.com/ethereum/go-ethereum v1.10.14
+	github.com/google/uuid v1.2.0 // indirect
+	github.com/hashcloak/Meson v0.0.0-20220404131202-9abe47bc9a1c
+	github.com/tklauser/go-sysconf v0.3.7 // indirect
 )
