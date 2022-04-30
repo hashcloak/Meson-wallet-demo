@@ -3,10 +3,12 @@ package wallet
 import (
 	"encoding/hex"
 	"fmt"
+	"syscall"
 
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"golang.org/x/term"
 )
 
 func (w *Wallet) uiSetup() error {
@@ -49,8 +51,12 @@ func (w *Wallet) uiConfirm(fromAddress common.Address, tx *types.Transaction) {
 	fmt.Println("====================================")
 }
 
-func (w *Wallet) uiPassphrase() (passphrase string, err error) {
+func (w *Wallet) uiPassphrase() (string, error) {
 	fmt.Print("Enter passphrase: ")
-	_, err = fmt.Scanf("%s", &passphrase)
-	return
+	password, err := term.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		return "", err
+	}
+	fmt.Println("")
+	return string(password), nil
 }
