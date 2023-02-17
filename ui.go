@@ -3,6 +3,7 @@ package wallet
 import (
 	"encoding/hex"
 	"fmt"
+	"log"
 	"syscall"
 
 	"github.com/ethereum/go-ethereum/accounts"
@@ -41,14 +42,14 @@ func (w *Wallet) UiSelectAccount() accounts.Account {
 
 func (w *Wallet) uiConfirm(fromAddress common.Address, tx *types.Transaction) {
 	fmt.Printf("Using account %v\n", fromAddress)
-	fmt.Println("====================================")
+	log.Println("====================================")
 	fmt.Printf("To: %v\n", tx.To())
 	fmt.Printf("Value: %v\n", tx.Value())
 	fmt.Printf("Data: %v\n", hex.EncodeToString(tx.Data()))
 	fmt.Printf("Chain: %v\n", tx.ChainId())
 	fmt.Printf("GasLimit: %v\n", tx.Gas())
 	fmt.Printf("GasPrice: %v\n", tx.GasPrice())
-	fmt.Println("====================================")
+	log.Println("====================================")
 }
 
 func (w *Wallet) uiPassphrase() (string, error) {
@@ -57,6 +58,6 @@ func (w *Wallet) uiPassphrase() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println("")
+	log.Println("")
 	return string(password), nil
 }
