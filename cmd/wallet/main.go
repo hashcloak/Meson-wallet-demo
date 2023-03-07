@@ -40,21 +40,25 @@ func main() {
 		if *setReceiver == "" {
 			*setReceiver = w.UiSelectAccount().Address.Hex()
 		}
+		fmt.Println(".")
 		if _, ok := value.SetString(*setValue, 10); !ok {
 			fmt.Println("value is invalid")
 			os.Exit(0)
 		}
+		fmt.Println("..")
 		request := wallet.TransactionRequest{
 			ChainID: *setChainID,
 			To:      *setReceiver,
 			Value:   value,
 			Data:    *setData,
 		}
+		fmt.Println("...")
 		reply, err := wallet.ProcessRequest(w, request)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(0)
 		}
+		fmt.Println("....")
 		fmt.Println(reply)
 	}
 }
