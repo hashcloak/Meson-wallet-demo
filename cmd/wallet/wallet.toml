@@ -1,4 +1,4 @@
-KSLocation = "/tmp/meson-wallet/keystore"
+KSLocation = "/Users/liaoyuchen/Developer/Meson-wallet-demo/keystore"
 DefaultChainID = 5
 
 [Chain]
@@ -15,7 +15,7 @@ DefaultChainID = 5
 [Meson]
   [Meson.Logging]
     Disable = false
-    File = "/tmp/meson-wallet/wallet.log"
+    File = "/Users/liaoyuchen/Developer/Meson-wallet-demo/wallet.log"
     Level = "DEBUG"
   [Meson.UpstreamProxy]
     Type = "none"
@@ -30,13 +30,13 @@ DefaultChainID = 5
     CaseSensitiveUserIdentifiers = false
     PollingInterval = 100
   [Meson.Katzenmint]
-    ChainID = "test-chain-QvpdAC"
-    PrimaryAddress = "tcp://127.0.0.1:20017"
-    WitnessesAddresses = ["127.0.0.1:20017"]
-    DatabaseName = "wallet_db"
-    DatabaseDir = "/tmp/meson-wallet/db"
-    RPCAddress = "tcp://127.0.0.1:20017"
+    ChainID = "katzenmint-chain-71DRoz"
+    PrimaryAddress = "tcp://127.0.0.1:21483"
+    WitnessesAddresses = ["127.0.0.1:21483"]
+    DatabaseName = "ping"
+    DatabaseDir = "/tmp/meson/ping/db"
+    RPCAddress = "tcp://127.0.0.1:21483"
     [Meson.Katzenmint.TrustOptions]
       Period = 600000000000
-      Height = 1
-      Hash = [127, 220, 217, 253, 88, 37, 197, 138, 103, 235, 93, 91, 74, 27, 29, 57, 110, 46, 119, 231, 15, 29, 149, 61, 165, 45, 132, 61, 134, 32, 151, 36]
+      Height = 169753
+      Hash = [14, 124, 242, 69, 11, 252, 40, 58, 102, 162, 134, 0, 68, 106, 229, 162, 11, 99, 255, 147, 129, 38, 57, 219, 7, 131, 254, 224, 11, 182, 119, 227]
