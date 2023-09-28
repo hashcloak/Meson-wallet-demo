@@ -1,4 +1,4 @@
-KSLocation = "/Users/liaoyuchen/Developer/Meson-wallet-demo/keystore"
+KSLocation = "/tmp/meson-wallet/keystore"
 DefaultChainID = 5
 
 [Chain]
@@ -15,7 +15,7 @@ DefaultChainID = 5
 [Meson]
   [Meson.Logging]
     Disable = false
-    File = "/Users/liaoyuchen/Developer/Meson-wallet-demo/wallet.log"
+    File = "/tmp/meson-wallet/wallet.log"
     Level = "DEBUG"
   [Meson.UpstreamProxy]
     Type = "none"
