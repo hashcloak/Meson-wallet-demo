@@ -13,3 +13,4 @@
 
 # Build
 cmd/wallet/wallet
+keystore
