@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"math/big"
 
-	ks "github.com/ethereum/go-ethereum/accounts/keystore"
-	ethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/ethereum/go-ethereum/core/types"
 	config "github.com/hashcloak/Meson-wallet-demo/config"
 	client "github.com/hashcloak/Meson/client"
 	"github.com/hashcloak/Meson/plugin/pkg/command"
 	"github.com/hashcloak/Meson/plugin/pkg/common"
+	ks "github.com/hashcloak/go-ethereum/accounts/keystore"
+	ethcommon "github.com/hashcloak/go-ethereum/common"
+	"github.com/hashcloak/go-ethereum/common/hexutil"
+	"github.com/hashcloak/go-ethereum/core/types"
 )
 
 const mesonService = "meson"
@@ -135,6 +135,15 @@ func (w *Wallet) SendTx(tx *types.Transaction) (string, error) {
 		return "", err
 	}
 	req := common.NewRequest(command.PostTransaction, w.Ticker(tx.ChainId().Int64()), payload).ToJson()
+	return w.throughMeson(req)
+}
+
+func (w *Wallet) SendHexSignedTx(signedTx string, chainId int64) (string, error) {
+	payload, err := json.Marshal(command.PostTransactionRequest{TxHex: signedTx})
+	if err != nil {
+		return "", err
+	}
+	req := common.NewRequest(command.PostTransaction, w.Ticker(chainId), payload).ToJson()
 	return w.throughMeson(req)
 }
 

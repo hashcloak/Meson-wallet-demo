@@ -1,5 +1,5 @@
 KSLocation = "/tmp/meson-wallet/keystore"
-DefaultChainID = 5
+DefaultChainID = 17000
 
 [Chain]
   [Chain.5]
