@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/btcsuite/btcd/chaincfg"
 	wallet "github.com/hashcloak/Meson-wallet-demo"
 )
 
@@ -20,12 +21,17 @@ func main() {
 	setReceiver := flag.String("a", "", "Address of the receiver")
 	setValue := flag.String("v", "10", "Value to transfer")
 	setData := flag.String("d", "", "Data to append")
+	// for bitcoin transaction
+	unspentTxHash := flag.String("utxhash", "", "unspent tx hash (for bitcoin)")
+	unspentIndex := flag.Uint("uindex", 0, "unspent index (for bitcoin)")
+	left := flag.Int64("left", 0, "left money (should deduct miner fee, for bitcoin)")
 	flag.Parse()
 
 	w, err := wallet.New(*walletCfgFile)
 	if err != nil {
 		panic(err)
 	}
+	isBitcoin := (len(*unspentTxHash) > 0)
 	defer w.Close()
 	if *setListen {
 		fmt.Println("Listening on port", listenPort[1:])
@@ -38,6 +44,9 @@ func main() {
 		fmt.Println("Testing ...")
 		value := big.Int{}
 		if *setReceiver == "" {
+			if isBitcoin {
+				panic("please set receiver")
+			}
 			*setReceiver = w.UiSelectAccount().Address.Hex()
 		}
 		fmt.Println(".")
@@ -51,6 +60,12 @@ func main() {
 			To:      *setReceiver,
 			Value:   value,
 			Data:    *setData,
+		}
+		if isBitcoin {
+			request.UnspentTxHash = *unspentTxHash
+			request.UnspentIndex = *unspentIndex
+			request.Left = *left
+			request.Chain = &chaincfg.TestNet3Params
 		}
 		fmt.Println("...")
 		reply, err := wallet.ProcessRequest(w, request)
