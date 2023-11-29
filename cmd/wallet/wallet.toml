@@ -1,16 +1,15 @@
 KSLocation = "/tmp/meson-wallet/keystore"
-DefaultChainID = 17000
+Ticker = "gor"
 
 [Chain]
   [Chain.5]
     Ticker = "gor"
-    Endpoint = "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
   [Chain.4]
     Ticker = "rin"
-    Endpoint = "https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
   [Chain.42]
     Ticker = "kov"
-    Endpoint = "https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"
+  [Chain.17000]
+    Ticker = "hol"
 
 [Meson]
   [Meson.Logging]

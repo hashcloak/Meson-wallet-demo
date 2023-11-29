@@ -9,6 +9,7 @@ require (
 	github.com/btcsuite/btcd v0.23.4
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2
 	github.com/btcsuite/btcd/btcutil v1.1.2
+	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.1
 	github.com/hashcloak/Meson v0.0.0-20231128092016-090a158f91b0
 	github.com/hashcloak/go-ethereum v1.9.10-0.20231113143453-84708536c138
 	golang.org/x/term v0.13.0
@@ -22,7 +23,6 @@ require (
 	github.com/StackExchange/wmi v1.2.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.7.0 // indirect
-	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.1 // indirect
 	github.com/btcsuite/btclog v0.0.0-20170628155309-84c8d2346e9f // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect

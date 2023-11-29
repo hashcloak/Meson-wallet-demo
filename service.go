@@ -59,6 +59,9 @@ func ProcessRequest(w *Wallet, request TransactionRequest) (reply string, err er
 		userAddress, err := btcutil.NewAddressScriptHash(
 			redeemScript, request.Chain,
 		)
+		if err != nil {
+			return "", err
+		}
 		decUserAddress, err := btcutil.DecodeAddress(userAddress.String(), request.Chain)
 		if err != nil {
 			return "", err
@@ -124,7 +127,7 @@ func ProcessRequest(w *Wallet, request TransactionRequest) (reply string, err er
 		tx.Serialize(&signedTx)
 
 		hexSignedTx := hex.EncodeToString(signedTx.Bytes())
-		reply, err = w.SendHexSignedTx(hexSignedTx, request.ChainID)
+		reply, err = w.SendHexSignedTx(hexSignedTx)
 		if err != nil {
 			return "", err
 		}
